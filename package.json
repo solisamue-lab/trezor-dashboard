@@ -1,0 +1,12 @@
+{
+  "name": "trezor-dashboard",
+  "version": "1.0.0",
+  "description": "TREZOR Dashboard with Telegram integration",
+  "scripts": {
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": ["trezor", "dashboard"],
+  "author": "",
+  "license": "MIT"
+}
+

